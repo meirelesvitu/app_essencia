@@ -1,7 +1,6 @@
 {
   "outputDirectory": "public",
   "routes": [
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/index.html" }
+    { "handle": "filesystem" }
   ]
 }

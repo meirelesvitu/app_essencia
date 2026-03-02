@@ -32,6 +32,8 @@ export async function loadAdminOrders() {
   if (error) { showToast('Erro: ' + error.message, 'error'); return; }
 
   allOrders = data || [];
+  const countEl = document.getElementById('orderCount');
+  if (countEl) countEl.textContent = `${allOrders.length} pedido${allOrders.length !== 1 ? 's' : ''}`;
   renderAdminOrders();
   renderStats();
 }
@@ -43,7 +45,8 @@ export function renderAdminOrders(statusFilter = 'all', payFilter = 'all', searc
   const filtered = allOrders.filter(o => {
     const matchStatus = statusFilter === 'all' || o.status === statusFilter;
     const matchPay = payFilter === 'all' || o.payment_status === payFilter;
-    const matchSearch = o.order_number.includes(search) || o.customer_name.toLowerCase().includes(search.toLowerCase());
+    const q = search.replace(/^#/, '');
+    const matchSearch = !q || o.order_number.includes(q) || o.customer_name.toLowerCase().includes(q.toLowerCase());
     return matchStatus && matchPay && matchSearch;
   });
 
@@ -74,12 +77,12 @@ export function renderAdminOrders(statusFilter = 'all', payFilter = 'all', searc
           ${items.map(i => `
             <div class="order-card-item">
               <span>${i.quantity}x ${i.product_name_snapshot}</span>
-              <span>${formatBRL(i.subtotal_cents || i.subtotal * 100)}</span>
+              <span>${formatBRL(i.subtotal_cents ?? 0)}</span>
             </div>
           `).join('')}
           <div class="order-card-total">
             <span class="order-card-total-label">Total</span>
-            <span class="order-card-total-value">${formatBRL(o.total_cents || o.total_amount * 100)}</span>
+            <span class="order-card-total-value">${formatBRL(o.total_cents ?? 0)}</span>
           </div>
         </div>
         ${o.notes ? `<div class="order-card-notes">📝 ${o.notes}</div>` : ''}

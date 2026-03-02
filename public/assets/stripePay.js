@@ -1,6 +1,5 @@
 // stripePay.js — Stripe frontend integration (used on success page)
 import { supabase } from './supabaseClient.js';
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
 
 export async function checkSessionStatus(sessionId) {
   if (!sessionId) return null;

@@ -20,6 +20,8 @@ export async function loadAdminProducts() {
   if (error) { showToast('Erro: ' + error.message, 'error'); return; }
 
   allProducts = data || [];
+  const countEl = document.getElementById('productCount');
+  if (countEl) countEl.textContent = `${allProducts.length} produto${allProducts.length !== 1 ? 's' : ''}`;
   renderAdminProducts();
 }
 
@@ -153,7 +155,6 @@ export async function saveProduct() {
     name,
     description: desc || null,
     price_cents: price,
-    price: price / 100, // keep legacy column in sync
     image_url: imageUrl || null,
     active,
     stock: stock ? parseInt(stock) : null,
