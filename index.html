@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cantina Essência — Ministério de Jovens</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
+</head>
+<body>
+  <header class="header" id="header"></header>
+
+  <div class="hero">
+    <h1>Cardápio da Cantina 🔥</h1>
+    <p>Feito com amor para o Ministério Essência</p>
+  </div>
+
+  <main class="container">
+    <div class="loader" id="productLoader">
+      <div class="loader-spinner"></div>
+      <span class="loader-text">Carregando cardápio...</span>
+    </div>
+    <div class="product-grid" id="productGrid"></div>
+  </main>
+
+  <script type="module">
+    import { renderHeader } from '/assets/app.js';
+    import { loadProducts } from '/assets/publicProducts.js';
+    renderHeader();
+    loadProducts();
+  </script>
+</body>
+</html>

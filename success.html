@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pedido Confirmado — Cantina Essência</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
+</head>
+<body>
+  <header class="header" id="header"></header>
+
+  <div class="container-sm" style="padding-top:40px;padding-bottom:40px;">
+    <div class="loader" id="successLoader">
+      <div class="loader-spinner"></div>
+      <span class="loader-text">Verificando pagamento...</span>
+    </div>
+
+    <div class="hidden" id="successContent">
+      <div class="confirm-hero">
+        <div class="confirm-emoji">🎉</div>
+        <h2 style="font-family:var(--font-display);font-size:28px;font-weight:800;">Pedido Confirmado!</h2>
+        <p style="color:var(--text-2);margin-top:8px;">Seu pagamento foi processado com sucesso</p>
+      </div>
+
+      <div class="section-box">
+        <div class="text-center mb-4">
+          <div style="font-size:12px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Número do Pedido</div>
+          <div class="confirm-number" id="successOrderNumber">#00000</div>
+        </div>
+
+        <div class="confirm-grid" id="successGrid"></div>
+
+        <div style="border-top:1px solid var(--border);padding-top:16px;">
+          <div style="font-size:12px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px;">Itens</div>
+          <div id="successItems"></div>
+          <div class="summary-total" id="successTotal"></div>
+        </div>
+      </div>
+
+      <a href="/" class="btn btn-primary btn-lg btn-block mt-4">Fazer Novo Pedido</a>
+    </div>
+
+    <div class="hidden" id="successPending">
+      <div class="confirm-hero">
+        <div class="confirm-emoji">⏳</div>
+        <h2 style="font-family:var(--font-display);font-size:28px;font-weight:800;">Processando...</h2>
+        <p style="color:var(--text-2);margin-top:8px;">Seu pagamento está sendo processado. Aguarde a confirmação.</p>
+      </div>
+      <a href="/" class="btn btn-secondary btn-lg btn-block mt-4">Voltar ao Cardápio</a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { renderHeader, formatBRL, formatDate } from '/assets/app.js';
+    import { checkSessionStatus } from '/assets/stripePay.js';
+
+    renderHeader();
+
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get('session_id');
+
+    async function init() {
+      if (!sessionId) {
+        document.getElementById('successLoader').classList.add('hidden');
+        document.getElementById('successPending').classList.remove('hidden');
+        return;
+      }
+
+      // Poll for order status (webhook may take a moment)
+      let order = null;
+      for (let i = 0; i < 6; i++) {
+        order = await checkSessionStatus(sessionId);
+        if (order) break;
+        await new Promise(r => setTimeout(r, 2000));
+      }
+
+      document.getElementById('successLoader').classList.add('hidden');
+
+      if (!order) {
+        document.getElementById('successPending').classList.remove('hidden');
+        return;
+      }
+
+      const STATUS_MAP = {
+        RESERVED: { label: 'Reservado', badge: 'badge-blue' },
+        PAID: { label: 'Pago', badge: 'badge-green' },
+        DELIVERED: { label: 'Entregue', badge: 'badge-accent' },
+        CANCELLED: { label: 'Cancelado', badge: 'badge-red' },
+      };
+      const PAY_MAP = {
+        PENDING: { label: 'Pendente', badge: 'badge-yellow' },
+        CONFIRMED: { label: 'Confirmado', badge: 'badge-green' },
+        CANCELLED: { label: 'Cancelado', badge: 'badge-red' },
+      };
+
+      const si = STATUS_MAP[order.status] || STATUS_MAP.RESERVED;
+      const pi = PAY_MAP[order.payment_status] || PAY_MAP.PENDING;
+      const items = order.order_items || [];
+
+      document.getElementById('successOrderNumber').textContent = `#${order.order_number}`;
+      document.getElementById('successGrid').innerHTML = `
+        <div class="confirm-cell"><div class="confirm-cell-label">Cliente</div><div class="confirm-cell-value">${order.customer_name}</div></div>
+        <div class="confirm-cell"><div class="confirm-cell-label">Data</div><div class="confirm-cell-value">${formatDate(order.created_at)}</div></div>
+        <div class="confirm-cell"><div class="confirm-cell-label">Status</div><span class="badge-pill ${si.badge}">${si.label}</span></div>
+        <div class="confirm-cell"><div class="confirm-cell-label">Pagamento</div><span class="badge-pill ${pi.badge}">${pi.label}</span></div>
+      `;
+
+      document.getElementById('successItems').innerHTML = items.map(i => `
+        <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:14px;">
+          <span>${i.quantity}x ${i.product_name_snapshot}</span>
+          <span style="font-weight:600;">${formatBRL(i.subtotal_cents || 0)}</span>
+        </div>
+      `).join('');
+
+      document.getElementById('successTotal').innerHTML = `
+        <span class="summary-total-label">Total</span>
+        <span class="summary-total-value">${formatBRL(order.total_cents || 0)}</span>
+      `;
+
+      document.getElementById('successContent').classList.remove('hidden');
+    }
+
+    init();
+  </script>
+</body>
+</html>

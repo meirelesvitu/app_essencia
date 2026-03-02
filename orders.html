@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pedidos — Admin Cantina</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
+</head>
+<body>
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="sidebar">
+      <div class="admin-sidebar-header">
+        <button class="admin-sidebar-toggle" id="sidebarToggle">☰</button>
+        <span class="admin-sidebar-brand">🔥 Essência</span>
+      </div>
+      <nav class="admin-sidebar-nav">
+        <a href="/admin/orders.html" class="admin-sidebar-link active">
+          <span class="admin-sidebar-link-icon">📋</span>
+          <span class="admin-sidebar-link-text">Pedidos</span>
+        </a>
+        <a href="/admin/products.html" class="admin-sidebar-link">
+          <span class="admin-sidebar-link-icon">📦</span>
+          <span class="admin-sidebar-link-text">Produtos</span>
+        </a>
+      </nav>
+      <div class="admin-sidebar-footer">
+        <button class="admin-sidebar-link" id="logoutBtn" style="color:var(--red);">
+          <span class="admin-sidebar-link-icon">🚪</span>
+          <span class="admin-sidebar-link-text">Sair</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="admin-main">
+      <div style="max-width:1100px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:24px;">
+          <div>
+            <h1 class="admin-page-title">Pedidos</h1>
+            <p class="admin-page-subtitle" id="orderCount">Carregando...</p>
+          </div>
+          <button class="btn btn-secondary btn-sm" id="refreshBtn">🔄 Atualizar</button>
+        </div>
+
+        <!-- Stats -->
+        <div class="stat-grid" id="orderStats"></div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <div class="toolbar-search">
+            <span class="toolbar-search-icon">🔍</span>
+            <input type="text" placeholder="Buscar por nº ou nome..." id="orderSearch">
+          </div>
+          <select class="form-select" id="statusFilter" style="min-width:140px;">
+            <option value="all">Status: Todos</option>
+            <option value="RESERVED">Reservado</option>
+            <option value="PAID">Pago</option>
+            <option value="DELIVERED">Entregue</option>
+            <option value="CANCELLED">Cancelado</option>
+          </select>
+          <select class="form-select" id="payFilter" style="min-width:140px;">
+            <option value="all">Pgto: Todos</option>
+            <option value="PENDING">Pendente</option>
+            <option value="CONFIRMED">Confirmado</option>
+            <option value="CANCELLED">Cancelado</option>
+          </select>
+        </div>
+
+        <!-- Loader -->
+        <div class="loader" id="adminOrderLoader">
+          <div class="loader-spinner"></div>
+          <span class="loader-text">Carregando pedidos...</span>
+        </div>
+
+        <!-- Grid -->
+        <div class="order-grid" id="adminOrderGrid"></div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { guardAdmin, adminLogout } from '/assets/adminAuth.js';
+    import { loadAdminOrders, renderAdminOrders } from '/assets/adminOrders.js';
+
+    const admin = await guardAdmin();
+    if (!admin) throw new Error('Not admin');
+
+    document.getElementById('sidebarToggle').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    });
+    document.getElementById('logoutBtn').addEventListener('click', adminLogout);
+    document.getElementById('refreshBtn').addEventListener('click', loadAdminOrders);
+
+    await loadAdminOrders();
+
+    // Filters
+    let statusFilter = 'all', payFilter = 'all', search = '';
+
+    function applyFilters() {
+      renderAdminOrders(statusFilter, payFilter, search);
+    }
+
+    document.getElementById('orderSearch').addEventListener('input', e => {
+      search = e.target.value;
+      applyFilters();
+    });
+    document.getElementById('statusFilter').addEventListener('change', e => {
+      statusFilter = e.target.value;
+      applyFilters();
+    });
+    document.getElementById('payFilter').addEventListener('change', e => {
+      payFilter = e.target.value;
+      applyFilters();
+    });
+  </script>
+</body>
+</html>

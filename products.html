@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Produtos — Admin Cantina</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
+</head>
+<body>
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="sidebar">
+      <div class="admin-sidebar-header">
+        <button class="admin-sidebar-toggle" id="sidebarToggle">☰</button>
+        <span class="admin-sidebar-brand">🔥 Essência</span>
+      </div>
+      <nav class="admin-sidebar-nav">
+        <a href="/admin/orders.html" class="admin-sidebar-link">
+          <span class="admin-sidebar-link-icon">📋</span>
+          <span class="admin-sidebar-link-text">Pedidos</span>
+        </a>
+        <a href="/admin/products.html" class="admin-sidebar-link active">
+          <span class="admin-sidebar-link-icon">📦</span>
+          <span class="admin-sidebar-link-text">Produtos</span>
+        </a>
+      </nav>
+      <div class="admin-sidebar-footer">
+        <button class="admin-sidebar-link" id="logoutBtn" style="color:var(--red);">
+          <span class="admin-sidebar-link-icon">🚪</span>
+          <span class="admin-sidebar-link-text">Sair</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="admin-main">
+      <div style="max-width:1100px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:24px;">
+          <div>
+            <h1 class="admin-page-title">Produtos</h1>
+            <p class="admin-page-subtitle" id="productCount">Carregando...</p>
+          </div>
+          <button class="btn btn-primary" id="newProductBtn">＋ Novo Produto</button>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <div class="toolbar-search">
+            <span class="toolbar-search-icon">🔍</span>
+            <input type="text" placeholder="Buscar produto..." id="productSearch">
+          </div>
+          <div class="toolbar-filters" id="productFilters">
+            <button class="toolbar-filter-btn active" data-filter="all">Todos</button>
+            <button class="toolbar-filter-btn" data-filter="active">Ativos</button>
+            <button class="toolbar-filter-btn" data-filter="inactive">Inativos</button>
+          </div>
+        </div>
+
+        <!-- Loader -->
+        <div class="loader" id="adminProductLoader">
+          <div class="loader-spinner"></div>
+          <span class="loader-text">Carregando produtos...</span>
+        </div>
+
+        <!-- Grid -->
+        <div class="admin-product-grid" id="adminProductGrid"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Product Modal -->
+  <div class="modal-overlay" id="productModalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="productModalTitle">Novo Produto</h3>
+        <button class="modal-close" id="closeProductModal">&times;</button>
+      </div>
+      <div id="productModalForm"></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="cancelProductModal">Cancelar</button>
+        <button class="btn btn-primary" id="saveProductBtn">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirm Modal -->
+  <div class="modal-overlay" id="deleteModalOverlay">
+    <div class="modal" style="max-width:400px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Confirmar Exclusão</h3>
+        <button class="modal-close" id="closeDeleteModal">&times;</button>
+      </div>
+      <p style="color:var(--text-2);margin-bottom:20px;">
+        Excluir <strong id="deleteProductName" style="color:var(--text);"></strong>? Essa ação não pode ser desfeita.
+      </p>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="cancelDeleteModal">Cancelar</button>
+        <button class="btn btn-danger" id="confirmDeleteBtn">Excluir</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { guardAdmin, adminLogout } from '/assets/adminAuth.js';
+    import {
+      loadAdminProducts, renderAdminProducts,
+      openProductModal, closeProductModal, saveProduct,
+      closeDeleteModal, doDeleteProduct
+    } from '/assets/adminProducts.js';
+
+    const admin = await guardAdmin();
+    if (!admin) throw new Error('Not admin');
+
+    // Sidebar toggle
+    document.getElementById('sidebarToggle').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', adminLogout);
+
+    // Product CRUD
+    await loadAdminProducts();
+
+    let currentFilter = 'all';
+    let currentSearch = '';
+
+    document.getElementById('newProductBtn').addEventListener('click', () => openProductModal());
+    document.getElementById('closeProductModal').addEventListener('click', closeProductModal);
+    document.getElementById('cancelProductModal').addEventListener('click', closeProductModal);
+    document.getElementById('productModalOverlay').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) closeProductModal();
+    });
+    document.getElementById('saveProductBtn').addEventListener('click', saveProduct);
+
+    document.getElementById('closeDeleteModal').addEventListener('click', closeDeleteModal);
+    document.getElementById('cancelDeleteModal').addEventListener('click', closeDeleteModal);
+    document.getElementById('deleteModalOverlay').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) closeDeleteModal();
+    });
+    document.getElementById('confirmDeleteBtn').addEventListener('click', doDeleteProduct);
+
+    // Search & filters
+    document.getElementById('productSearch').addEventListener('input', (e) => {
+      currentSearch = e.target.value;
+      renderAdminProducts(currentFilter, currentSearch);
+    });
+
+    document.querySelectorAll('#productFilters .toolbar-filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#productFilters .toolbar-filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        renderAdminProducts(currentFilter, currentSearch);
+      });
+    });
+  </script>
+</body>
+</html>

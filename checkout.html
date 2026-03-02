@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout — Cantina Essência</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
+</head>
+<body>
+  <header class="header" id="header"></header>
+
+  <!-- Step 1: Order details -->
+  <div class="container-sm" id="checkoutStep1" style="padding-top:32px;padding-bottom:40px;">
+    <a href="/" style="display:inline-flex;align-items:center;gap:6px;color:var(--text-2);margin-bottom:24px;font-size:14px;font-family:var(--font-display);">← Voltar ao cardápio</a>
+
+    <h2 style="font-family:var(--font-display);font-size:28px;font-weight:800;margin-bottom:8px;">Finalizar Pedido</h2>
+    <p style="color:var(--text-2);margin-bottom:32px;font-size:14px;">Confira seus itens e preencha seus dados</p>
+
+    <div class="section-box" id="checkoutSummary"></div>
+    <div class="section-box" id="checkoutForm"></div>
+
+    <button class="btn btn-primary btn-lg btn-block mt-4" id="submitOrderBtn" onclick="submitOrder()">
+      Confirmar Pedido
+    </button>
+  </div>
+
+  <!-- Step 2: Payment -->
+  <div class="container-sm hidden" id="checkoutStep2" style="padding-top:40px;padding-bottom:40px;">
+    <div class="section-box" id="paymentSummary"></div>
+
+    <div class="section-box">
+      <div class="section-box-title">Pagamento</div>
+      <p style="font-size:14px;color:var(--text-2);margin-bottom:20px;">
+        Clique abaixo para pagar de forma segura via Stripe (cartão de crédito/débito).
+      </p>
+      <button class="stripe-btn" id="stripePayBtn" onclick="payWithStripe()">
+        💳 Pagar com Stripe
+      </button>
+      <div class="pix-box">
+        <div class="pix-title">💡 Ou pague via PIX</div>
+        <div class="pix-key">pix@cantinaessencia.com.br</div>
+        <div class="pix-note">Envie o valor exato e aguarde a confirmação do admin</div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { renderHeader } from '/assets/app.js';
+    import { initCheckout, submitOrder, payWithStripe } from '/assets/checkout.js';
+    renderHeader();
+    initCheckout();
+  </script>
+</body>
+</html>

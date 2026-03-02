@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pagamento Cancelado — Cantina Essência</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
+</head>
+<body>
+  <header class="header" id="header"></header>
+
+  <div class="container-sm" style="padding-top:60px;padding-bottom:40px;text-align:center;">
+    <div style="font-size:64px;margin-bottom:16px;">😔</div>
+    <h2 style="font-family:var(--font-display);font-size:28px;font-weight:800;margin-bottom:8px;">Pagamento Cancelado</h2>
+    <p style="color:var(--text-2);margin-bottom:32px;">Seu pedido foi criado mas o pagamento não foi concluído.</p>
+
+    <div class="section-box" style="text-align:left;">
+      <div class="section-box-title">O que aconteceu?</div>
+      <p style="font-size:14px;color:var(--text-2);line-height:1.7;">
+        Você cancelou o pagamento no Stripe ou houve um erro. Seu pedido ainda está registrado como pendente.
+        Você pode tentar pagar novamente ou entrar em contato com o admin da cantina.
+      </p>
+    </div>
+
+    <div style="display:flex;gap:12px;justify-content:center;margin-top:24px;">
+      <a href="/" class="btn btn-primary btn-lg">Voltar ao Cardápio</a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { renderHeader } from '/assets/app.js';
+    renderHeader();
+  </script>
+</body>
+</html>
