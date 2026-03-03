@@ -37,7 +37,7 @@ $$;
 -- profiles (links auth.users to role)
 CREATE TABLE IF NOT EXISTS profiles (
   id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  role text NOT NULL CHECK (role IN ('ADMIN', 'USER')),
+  role text NOT NULL DEFAULT 'USER' CHECK (role IN ('ADMIN', 'USER')),
   created_at timestamptz DEFAULT now()
 );
 
@@ -125,6 +125,7 @@ ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
 -- profiles
 CREATE POLICY "Users read own profile" ON profiles FOR SELECT USING (auth.uid() = id);
 CREATE POLICY "Admins read all profiles" ON profiles FOR SELECT USING (is_admin());
+CREATE POLICY "Admins update profiles" ON profiles FOR UPDATE USING (is_admin()) WITH CHECK (is_admin());
 
 -- products
 CREATE POLICY "anon_select_active_products" ON products FOR SELECT USING (active = true);

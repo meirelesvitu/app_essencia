@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Login — Cantina Essência</title>
   <link rel="stylesheet" href="/assets/styles.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
 </head>
+
 <body>
   <div class="login-page">
     <div class="login-card fade-up">
@@ -29,18 +32,19 @@
 
       <button class="btn btn-primary btn-lg btn-block mt-4" id="loginBtn">Entrar</button>
 
-      <a href="/" style="display:block;text-align:center;margin-top:16px;color:var(--text-3);font-size:13px;">← Voltar ao cardápio</a>
+      <a href="/" style="display:block;text-align:center;margin-top:16px;color:var(--text-3);font-size:13px;">← Voltar
+        ao cardápio</a>
     </div>
   </div>
 
   <script type="module">
-    import { signIn, getSession, checkAdmin } from '/assets/adminAuth.js';
+    import { signIn, getSession, getMyRole } from '/assets/adminAuth.js';
 
     // Se já estiver com sessão, verificar se é admin
     getSession().then(async session => {
       if (session) {
-          const admin = await checkAdmin();
-          if (admin) window.location.href = '/admin/orders.html';
+        const role = await getMyRole();
+        if (role === 'ADMIN') window.location.href = '/admin/orders.html';
       }
     });
 
@@ -78,4 +82,5 @@
     });
   </script>
 </body>
+
 </html>

@@ -59,12 +59,28 @@ Crie e garanta o acesso do administrador sem armazenar credenciais no código:
    npm init -y
    npm install @supabase/supabase-js dotenv
    ```
-4. Rode o script de provisionamento:
+
+**Como promover a ADMIN:**
+- **Opção A (Via Script):** Rode o script de provisionamento:
    ```bash
    node scripts/provision-admin.js
    ```
    *Isso criará o usuário `admin@admin.com` no seu Supabase Auth, e definirá a role dele como `ADMIN` na tabela `profiles`.*
-5. Para alterar a senha do admin futuramente, utilize a funcionalidade padrão de "Reset Password" (esqueci minha senha) enviando o email de recovery pela interface do seu Supabase ou implementando o fluxo no frontend.
+
+- **Opção B (Via SQL no Supabase):**
+   1. Crie o usuário normalmente via Supabase Auth ou pela página.
+   2. No SQL Editor do Supabase, rode:
+   ```sql
+   UPDATE profiles SET role = 'ADMIN' WHERE id = '<auth-user-id>';
+   ```
+
+**Como revogar acesso de ADMIN:**
+- Vá no SQL Editor do Supabase e rode:
+   ```sql
+   UPDATE profiles SET role = 'USER' WHERE id = '<auth-user-id>';
+   ```
+
+Para alterar a senha do admin futuramente, utilize a funcionalidade padrão de "Reset Password" (esqueci minha senha) enviando o email de recovery pela interface do seu Supabase ou implementando o fluxo no frontend.
 
 ### 3. Config Frontend
 
