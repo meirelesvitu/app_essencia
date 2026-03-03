@@ -9,7 +9,7 @@ dotenv.config({ path: path.join(__dirname, '../.env') });
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const ADMIN_EMAIL = 'admin@admin.com';
+const ADMIN_EMAIL = 'vmeireles@gmail.com';
 const ADMIN_PASSWORD = process.env.SUPABASE_ADMIN_INITIAL_PASSWORD;
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY || !ADMIN_PASSWORD) {
@@ -71,11 +71,23 @@ async function provisionAdmin() {
 
     console.log(`Garantindo que a role 'ADMIN' esteja definida na tabela profiles...`);
 
-    // Update the profiles table to ensure role is ADMIN
-    // We use upsert in case the trigger handle_new_user hasn't fired yet or to override it
-    const { error: profileErr } = await supabase
+    // Tenta primeiro usando a coluna 'id' (esquema novo)
+    let profileErr = null;
+    const { error: errId } = await supabase
         .from('profiles')
         .upsert({ id: userId, role: 'ADMIN' }, { onConflict: 'id' });
+
+    if (errId) {
+        if (errId.message.includes("Could not cache") || errId.message.includes("column")) {
+            console.log(`Coluna 'id' falhou, tentando inserir/atualizar com a coluna legacy 'user_id'...`);
+            const { error: errUserId } = await supabase
+                .from('profiles')
+                .upsert({ user_id: userId, role: 'ADMIN' }, { onConflict: 'user_id' });
+            profileErr = errUserId;
+        } else {
+            profileErr = errId;
+        }
+    }
 
     if (profileErr) {
         console.error("Erro ao definir role na tabela profiles:", profileErr.message);
