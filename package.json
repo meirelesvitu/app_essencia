@@ -1,0 +1,25 @@
+{
+  "name": "app_essencia",
+  "version": "1.0.0",
+  "description": "Sistema de pedidos para a cantina do Ministério Essência (ministério de jovens), com cardápio público, carrinho, checkout com Stripe, e painel administrativo.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/meirelesvitu/app_essencia.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/meirelesvitu/app_essencia/issues"
+  },
+  "homepage": "https://github.com/meirelesvitu/app_essencia#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.98.0",
+    "dotenv": "^17.3.1"
+  }
+}
