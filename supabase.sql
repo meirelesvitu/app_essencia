@@ -17,7 +17,7 @@ STABLE
 AS $$
   SELECT EXISTS (
     SELECT 1 FROM public.profiles
-    WHERE user_id = auth.uid() AND role = 'ADMIN'
+    WHERE id = auth.uid() AND role = 'ADMIN'
   );
 $$;
 
@@ -36,10 +36,24 @@ $$;
 
 -- profiles (links auth.users to role)
 CREATE TABLE IF NOT EXISTS profiles (
-  user_id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  role text NOT NULL CHECK (role IN ('ADMIN')),
+  id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  role text NOT NULL CHECK (role IN ('ADMIN', 'USER')),
   created_at timestamptz DEFAULT now()
 );
+
+-- trigger to insert profile for new auth.users
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger AS $$
+BEGIN
+  INSERT INTO public.profiles (id, role)
+  VALUES (new.id, 'USER');
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
 
 -- products
 CREATE TABLE IF NOT EXISTS products (
@@ -109,7 +123,7 @@ ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
 -- 6) RLS Policies
 
 -- profiles
-CREATE POLICY "Users read own profile" ON profiles FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users read own profile" ON profiles FOR SELECT USING (auth.uid() = id);
 CREATE POLICY "Admins read all profiles" ON profiles FOR SELECT USING (is_admin());
 
 -- products
@@ -129,8 +143,8 @@ CREATE POLICY "admin_all_order_items" ON order_items FOR ALL USING (is_admin());
 -- payments
 CREATE POLICY "admin_all_payments" ON payments FOR ALL USING (is_admin());
 
--- 7) Seed admin profile (run after creating user in Supabase Auth)
--- INSERT INTO profiles (user_id, role) VALUES ('<auth-user-uuid>', 'ADMIN');
+-- 7) Seed admin profile (run after creating user in Supabase Auth, or via provisioning script)
+-- INSERT INTO profiles (id, role) VALUES ('<auth-user-uuid>', 'ADMIN');
 
 -- 8) Seed example products
 INSERT INTO products (name, description, price_cents, image_url, active, stock) VALUES

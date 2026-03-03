@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Produtos — Admin Cantina</title>
   <link rel="stylesheet" href="/assets/styles.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
 </head>
+
 <body>
   <div class="admin-layout">
     <!-- Sidebar -->
@@ -36,7 +39,8 @@
     <!-- Main -->
     <main class="admin-main">
       <div style="max-width:1100px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:24px;">
+        <div
+          style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:24px;">
           <div>
             <h1 class="admin-page-title">Produtos</h1>
             <p class="admin-page-subtitle" id="productCount">Carregando...</p>
@@ -102,14 +106,14 @@
   </div>
 
   <script type="module">
-    import { guardAdmin, adminLogout } from '/assets/adminAuth.js';
+    import { requireAdmin, signOut } from '/assets/adminAuth.js';
     import {
       loadAdminProducts, renderAdminProducts,
       openProductModal, closeProductModal, saveProduct,
       closeDeleteModal, doDeleteProduct
     } from '/assets/adminProducts.js';
 
-    const admin = await guardAdmin();
+    const admin = await requireAdmin();
     if (!admin) throw new Error('Not admin');
 
     // Sidebar toggle
@@ -117,7 +121,7 @@
       document.getElementById('sidebar').classList.toggle('collapsed');
     });
 
-    document.getElementById('logoutBtn').addEventListener('click', adminLogout);
+    document.getElementById('logoutBtn').addEventListener('click', signOut);
 
     // Product CRUD
     await loadAdminProducts();
@@ -156,4 +160,5 @@
     });
   </script>
 </body>
+
 </html>

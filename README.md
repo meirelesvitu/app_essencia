@@ -46,17 +46,29 @@ supabase/
 ### 1. Supabase
 
 1. Crie um projeto em [supabase.com](https://supabase.com)
-2. Execute `supabase/supabase.sql` no SQL Editor
-3. Em **Authentication > Users**, crie um usuário (email/senha)
-4. No SQL Editor, vincule como admin:
-   ```sql
-   INSERT INTO profiles (user_id, role)
-   VALUES ('<user-uuid-do-auth>', 'ADMIN');
+2. Execute `supabase/supabase.sql` no SQL Editor para criar o schema completo.
+
+### 2. Admin e Provisionamento
+
+Crie e garanta o acesso do administrador sem armazenar credenciais no código:
+1. Copie o `.env.example` para `.env` na raiz do projeto.
+2. Preencha o `.env` com a sua `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` e defina uma `SUPABASE_ADMIN_INITIAL_PASSWORD` forte. 
+   *(Nunca commite o arquivo `.env` nem a service role key).*
+3. Instale as dependências para o script Node.js:
+   ```bash
+   npm init -y
+   npm install @supabase/supabase-js dotenv
    ```
+4. Rode o script de provisionamento:
+   ```bash
+   node scripts/provision-admin.js
+   ```
+   *Isso criará o usuário `admin@admin.com` no seu Supabase Auth, e definirá a role dele como `ADMIN` na tabela `profiles`.*
+5. Para alterar a senha do admin futuramente, utilize a funcionalidade padrão de "Reset Password" (esqueci minha senha) enviando o email de recovery pela interface do seu Supabase ou implementando o fluxo no frontend.
 
-### 2. Config Frontend
+### 3. Config Frontend
 
-Copie `config.example.js` para `config.js` e preencha:
+Copie `public/assets/config.example.js` para `public/assets/config.js` e preencha:
 
 ```js
 export const SUPABASE_URL = 'https://seu-projeto.supabase.co';
@@ -65,7 +77,7 @@ export const STRIPE_PUBLISHABLE_KEY = 'pk_test_...';
 export const SITE_URL = 'https://seu-site.vercel.app';
 ```
 
-### 3. Stripe
+### 4. Stripe
 
 1. Crie uma conta em [stripe.com](https://stripe.com) (modo test)
 2. Pegue as chaves em Developers > API Keys:
@@ -76,7 +88,7 @@ export const SITE_URL = 'https://seu-site.vercel.app';
    - Eventos: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`
    - Copie o `STRIPE_WEBHOOK_SECRET` → env da Edge Function
 
-### 4. Edge Functions — Environment Variables
+### 5. Edge Functions — Environment Variables
 
 No dashboard do Supabase, em **Edge Functions > Secrets**, configure:
 
@@ -88,7 +100,7 @@ SITE_URL=https://seu-site.vercel.app
 
 (`SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` já são injetados automaticamente)
 
-### 5. Deploy Vercel
+### 6. Deploy Vercel
 
 1. Faça push do repo para GitHub
 2. Importe no Vercel como static site

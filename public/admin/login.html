@@ -34,11 +34,14 @@
   </div>
 
   <script type="module">
-    import { adminLogin, checkAdmin } from '/assets/adminAuth.js';
+    import { signIn, getSession, checkAdmin } from '/assets/adminAuth.js';
 
-    // If already logged in, redirect
-    checkAdmin().then(admin => {
-      if (admin) window.location.href = '/admin/orders.html';
+    // Se já estiver com sessão, verificar se é admin
+    getSession().then(async session => {
+      if (session) {
+          const admin = await checkAdmin();
+          if (admin) window.location.href = '/admin/orders.html';
+      }
     });
 
     const btn = document.getElementById('loginBtn');
@@ -59,8 +62,8 @@
       errorEl.classList.add('hidden');
 
       try {
-        await adminLogin(email, password);
-        window.location.href = '/admin/orders.html';
+        await signIn(email, password);
+        window.location.href = '/admin/products.html';
       } catch (err) {
         errorEl.textContent = err.message || 'Email ou senha incorretos';
         errorEl.classList.remove('hidden');

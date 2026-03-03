@@ -13,7 +13,7 @@ export async function checkAdmin() {
   const { data: profile } = await supabase
     .from('profiles')
     .select('role')
-    .eq('user_id', session.user.id)
+    .eq('id', session.user.id)
     .single();
 
   if (!profile || profile.role !== 'ADMIN') {
@@ -24,7 +24,7 @@ export async function checkAdmin() {
   return { user: session.user, role: profile.role };
 }
 
-export async function adminLogin(email, password) {
+export async function signIn(email, password) {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) throw error;
 
@@ -32,7 +32,7 @@ export async function adminLogin(email, password) {
   const { data: profile, error: profErr } = await supabase
     .from('profiles')
     .select('role')
-    .eq('user_id', data.user.id)
+    .eq('id', data.user.id)
     .single();
 
   if (profErr || !profile || profile.role !== 'ADMIN') {
@@ -43,14 +43,21 @@ export async function adminLogin(email, password) {
   return data;
 }
 
-export async function adminLogout() {
+export async function signOut() {
   await supabase.auth.signOut();
   window.location.href = '/admin/login.html';
 }
 
-export async function guardAdmin() {
+export async function requireAdmin() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    window.location.href = '/admin/login.html';
+    return null;
+  }
+  
   const admin = await checkAdmin();
   if (!admin) {
+    alert("Acesso negado: sem permissão de administrador.");
     window.location.href = '/admin/login.html';
     return null;
   }
